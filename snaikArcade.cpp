@@ -1,10 +1,7 @@
-#include<iostream>
-#include<conio.h>
 #include<stdlib.h>
+#include<conio.h>
+#include<iostream>
 #include<stdio.h>
-#include<cstdlib>
-#include<ctime>
-#include<time.h>
 #include<windows.h>
 #define width 70
 #define height 70
@@ -16,22 +13,92 @@ using namespace std;
 char ma[width][height];
 int headr=1;
 int headc=1;
-int w=width,h=height;
-char ch = 'w';
+int w=35,h=35;
+char ch = 'd';
 int initialize=0;
 
 
-//Structure of the Snake
-struct sbody
+
+//body
+struct node{
+     char data;
+     int rindex;
+     int cindex;
+     struct node* next;
+}*root=NULL;
+
+void append(char a,int r,int c)
 {
-	char data;
-	char* loc;
-	int cc;
-	struct sbody *next;
-}*root=NULL,*temp,*ptr;
+	//gene created
+	struct node* temp;
+	temp = (struct node*)malloc(sizeof(struct node));
+	temp->data = a;
+	temp->rindex = r;
+	temp->cindex = c;
+	temp->next = NULL;
+	//cout<<"Location recievded in node:"<<&(*b);
+	if(root==NULL)
+	{
+		//snake's head is being created;
+		root=temp;
+		root->data='0';
+		
+	}
+	else
+	{
+		struct node* ptr;
+		ptr=root;
+		while(ptr->next!=NULL)
+		{
+			ptr=ptr->next; //getting to last node
+		}
+		ptr->next=temp;//conecting the two nodes
+		temp->data='o';
+		}
+}
 
+void doChange(int r,int c)
+{
+	struct node* ptr;
+	int tempr,tempc;
+	//a for holding the new location of the head while b is a temporary variable
+	//cout<<"In change";
+	tempr = root->rindex;
+	tempc = root->cindex; //point to address stored at root->idexes
+	root->rindex = r;
+	root->cindex = c;
+	ptr = root->next;
+	while(ptr!=NULL)
+	{
+		r = ptr->rindex;
+		c = ptr->cindex;
+		
+		ptr->rindex = tempr;
+		ptr->cindex = tempc;
+		
+		ptr=ptr->next;
+	 } 
+	 
+	 //to check
+	 //approach to void the location of the last node
+	 if(root->next!=NULL)
+	 ma[r][c]=' ';
+	 else
+	 ma[tempr][tempc]=' ';
+	 //cout<<"Did change";
+}
 
-//The functions according to precedence
+void applyChange()
+{
+	struct node*ptr;
+	ptr=root;
+	//cout<<"Applying change";
+	while(ptr!=NULL)
+	{
+		ma[ptr->rindex][ptr->cindex]=ptr->data;
+		ptr=ptr->next; //applying the change on the respective nodes
+	}
+}
 
 void frame(){
 
@@ -67,88 +134,27 @@ void display()
 	}
 }
 
-void appendbody(){
-	temp=(struct sbody*)malloc(sizeof(struct sbody));
-	if(root==NULL)
-	{
-		root=temp;
-		root->data='0';
-		free(temp);
-	}
-	else
-	{
-		while(ptr->next!=NULL)
-		{
-			ptr=ptr->next;
-		}
-	ptr->next=temp;
-	}
-}
-
-//adress of ma[][] head that is actually moved
-void movebody(char* a){
-	char*b;
-	b=root->loc;
-	ptr=root;
-	root->loc=a;
-	while(ptr->next!=NULL)
-	{
-		//transferring the previous address to every next node
-	  ptr=ptr->next;
-	  b=a;
-	  a=ptr->loc;
-	  ptr->loc=b;
-	}
-}
-
-//changing and parsing value each time the display is going on
-void setcanvas(){
-frame();
-	
-}
-
-void MaximizeOutputWindow(void)
-{
-    HWND consoleWindow = GetConsoleWindow(); // This gets the value Windows uses to identify your output window 
-    ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its' maximize button
-}
- 
-
-//To deicde the position of the snake's apettite
-char* newFruit(){
-int w=1+(rand()%(width-2));
-int h=1+(rand()%(height-2));
-return &ma[w][h];
-}
-
-
-void moveDown(){
-	int i=0;
-	do{
-	system("CLS");
-	headr++;
-	ma[headr][headc]='O';
-	display();
-	i++;
-	}while(i<height-3);
-}
 
 void move(char ch)
 {
 	switch(ch)
 	{
 		case 'w':w--;
-		         movebody(&ma[w][h]);
+		         doChange(w,h);
+		         applyChange();
 		         break;
 		case 's':w++;
 		         //implement it on ma
-		         ma[w][h]='V';
+		         doChange(w,h);
+		         applyChange();
 		         break;
 		case 'a':h--;
-		         ma[w][h]='<';
+		         doChange(w,h);
+		         applyChange();
 				 break;
 		case 'd':h++;
-		         ma[w][h]='>';
+		         doChange(w,h);
+		         applyChange();
 				 break;		          
 	}
 }
@@ -158,8 +164,10 @@ void setGame(){
 if(initialize==0)
 {
 	system("CLS");
-	appendbody();
 	frame();
+	//appendbody();
+	append('0',w,h);
+	
 	display();
 	initialize++;
 	}else{
@@ -189,19 +197,14 @@ if(initialize==0)
 }
 
 
-//<<<<<<
-void logic()
-{
-	
-}
 
 int main()
 {
-	MaximizeOutputWindow();
+	
 	while(initialize!=-1)
 	{
 		setGame();
-		Sleep(100);
+	    Sleep(1000);
 	}
 	return 0;
 
