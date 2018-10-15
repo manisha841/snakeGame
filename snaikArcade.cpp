@@ -11,12 +11,14 @@ using namespace std;
 //The global map
 
 char ma[width][height];
-int headr=1;
-int headc=1;
 int w=35,h=35;
-char ch = 'd';
+char ch = 'd';//initially the snake's direction
 int initialize=0;
-
+int frow;
+int fcol;
+int score = 0;
+int stuck = 0;
+int found;//to check if fruit was tasted
 
 
 //body
@@ -27,7 +29,7 @@ struct node{
      struct node* next;
 }*root=NULL;
 
-void append(char a,int r,int c)
+void append(char a='o',int r=2,int c=2)
 {
 	//gene created
 	struct node* temp;
@@ -132,27 +134,114 @@ void display()
 		}
 	cout<<endl;
 	}
+	
+cout<<"___ SCORE____: "<<score;
 }
 
+//Getting the fruit in
+void placeFruit(){
+	
+   int rindex=1+(rand()%(width-2));
+   int cindex=1+(rand()%(height-2));
+   frow=rindex;
+   fcol=cindex;
+   ma[rindex][cindex]='@';
+   
+}
 
+//fruit mechanism
+
+void checkDiet(){
+	
+	if(frow==w&&fcol==h)
+	{
+		score+=100;
+		found=1;
+	}
+	
+	if(found==1)
+	{
+		placeFruit();
+		append();
+		found=0;
+	}
+}
+
+//to check whether the snake's head is touching it's body or not
+void findCor(){
+	struct node* ptr;
+	ptr=root->next;//as root will always be equal to it
+	while(ptr!=NULL)
+	{
+		if(ptr->rindex==w&&ptr->cindex==h)
+		{
+			stuck=1;
+		}
+		
+		ptr=ptr->next;
+	}
+}
+checkDeath()
+{
+	if((w>68||h>68)||(w<2||h<2))
+	{
+		initialize=-1;
+		system("CLS");
+		cout<<"\n\n\n\t\t\t\t  ||GAME _ _ OVER ||";
+		cout<<"\n\n\n\t\t\t\t___SCORE:"<<score;
+		getch();
+		exit(1);
+	}
+	else if(root->next!=NULL)
+	{
+		struct node* ptr;
+		ptr = root->next;
+		if(ptr!=NULL)
+		{
+		
+		 findCor();
+		 if(stuck)
+		 {
+		 	initialize=-1;
+		   system("CLS");
+		   cout<<"\n\n\n\t\t\t\t  ||GAME _ _ OVER ||";
+		   cout<<"\n\n\n\t\t\t\t___SCORE:"<<score;
+		   getch();
+		   exit(1);
+		  }
+		
+	    }
+	
+	}	
+}
+
+//Moving the snake via head
 void move(char ch)
 {
 	switch(ch)
 	{
 		case 'w':w--;
+		         checkDiet();
+		         checkDeath();
 		         doChange(w,h);
 		         applyChange();
 		         break;
 		case 's':w++;
 		         //implement it on ma
-		         doChange(w,h);
+		         checkDiet();
+		         checkDeath();
+				 doChange(w,h);
 		         applyChange();
 		         break;
 		case 'a':h--;
+		         checkDiet();
+		         checkDeath();
 		         doChange(w,h);
 		         applyChange();
 				 break;
 		case 'd':h++;
+		         checkDiet();
+		         checkDeath();
 		         doChange(w,h);
 		         applyChange();
 				 break;		          
@@ -167,7 +256,7 @@ if(initialize==0)
 	frame();
 	//appendbody();
 	append('0',w,h);
-	
+	placeFruit();
 	display();
 	initialize++;
 	}else{
@@ -204,7 +293,7 @@ int main()
 	while(initialize!=-1)
 	{
 		setGame();
-	    Sleep(1000);
+	    Sleep(500);
 	}
 	return 0;
 
